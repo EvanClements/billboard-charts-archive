@@ -1,0 +1,32 @@
+name: Weekly Billboard chart update
+
+on:
+  schedule:
+    - cron: "0 12 * * 0" # every Sunday, 12:00 UTC
+  workflow_dispatch: {} # allow manual runs from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+
+      - name: Fetch latest chart weeks and merge into parquet
+        run: |
+          uv run billboard_charts_archive.py \
+            --chart all \
+            --start-date "$(date -u -d '10 days ago' +%F)" \
+            --db /tmp/weekly.db \
+            --delay 0.5 \
+            --export-parquet data
+
+      - name: Commit updated parquet files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: weekly chart data update"
+          file_pattern: "data/*.parquet"
