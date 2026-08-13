@@ -25,8 +25,16 @@ import os
 
 import duckdb
 
-TABLE_START = "<!-- CHART-INVENTORY:START -->"
-TABLE_END = "<!-- CHART-INVENTORY:END -->"
+# The generator owns the section under this heading: on each run it replaces
+# everything from this heading up to the next level-2 (## ) heading, or the end
+# of the file. This keeps the rendered README free of visible marker comments
+# while still letting the table be regenerated in place.
+SECTION_HEADING = "## Chart inventory"
+SECTION_INTRO = (
+    "This section is generated from the parquet files on every update; "
+    "the table lists each chart, its file, the date range it covers, and the "
+    "SHA-256 of the file."
+)
 
 README_TEMPLATE = """# Billboard Charts Archive
 
@@ -37,12 +45,7 @@ The data is collected by `billboard_charts_archive.py` and refreshed every
 Sunday by the [`weekly-update`](.github/workflows/weekly-update.yml) GitHub
 Actions workflow.
 
-## Chart inventory
-
-The table below is generated automatically from the parquet files on every
-update -- do not edit it by hand.
-
-{table}
+{section}
 """
 
 
@@ -101,19 +104,38 @@ def build_table(data_dir: str) -> str:
     return "\n".join(lines)
 
 
+def render_section(table: str) -> str:
+    return "\n".join([SECTION_HEADING, "", SECTION_INTRO, "", table])
+
+
 def render_readme(existing: str | None, table: str) -> str:
-    block = f"{TABLE_START}\n{table}\n{TABLE_END}"
+    section = render_section(table)
     if existing is None:
-        return README_TEMPLATE.format(table=block)
+        return README_TEMPLATE.format(section=section)
 
-    if TABLE_START in existing and TABLE_END in existing:
-        before = existing.split(TABLE_START)[0]
-        after = existing.split(TABLE_END, 1)[1]
-        return f"{before}{block}{after}"
+    lines = existing.splitlines()
+    start = next(
+        (i for i, line in enumerate(lines) if line.strip() == SECTION_HEADING), None
+    )
 
-    # README exists but has no marker block yet -- append the section.
-    sep = "" if existing.endswith("\n\n") else ("\n" if existing.endswith("\n") else "\n\n")
-    return f"{existing}{sep}## Chart inventory\n\n{block}\n"
+    if start is None:
+        # README exists but has no inventory section yet -- append one.
+        body = existing.rstrip("\n")
+        return f"{body}\n\n{section}\n"
+
+    # Replace from the heading up to the next level-2 heading (or end of file),
+    # so any sections following the inventory are preserved untouched.
+    end = next(
+        (j for j in range(start + 1, len(lines)) if lines[j].startswith("## ")),
+        len(lines),
+    )
+    before = "\n".join(lines[:start]).rstrip("\n")
+    after = "\n".join(lines[end:]).strip("\n")
+
+    result = f"{before}\n\n{section}" if before else section
+    if after:
+        result = f"{result}\n\n{after}"
+    return result + "\n"
 
 
 def main() -> None:

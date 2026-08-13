@@ -9,10 +9,8 @@ Actions workflow.
 
 ## Chart inventory
 
-The table below is generated automatically from the parquet files on every
-update -- do not edit it by hand.
+This section is generated from the parquet files on every update; the table lists each chart, its file, the date range it covers, and the SHA-256 of the file.
 
-<!-- CHART-INVENTORY:START -->
 | Chart | File | From | To | Rows | Size | SHA-256 |
 | ----- | ---- | ---- | -- | ----:| ----:| ------- |
 | Adult Contemporary | [`data/adult-contemporary.parquet`](data/adult-contemporary.parquet) | 1961-07-22 | 2026-08-08 | 124,208 | 1.7 MB | `2c4dbc676cd0d9d95ce816c78e4151fd33585a0f121382dd5ae8b4e24568888b` |
@@ -26,4 +24,3 @@ update -- do not edit it by hand.
 | Pop Airplay | [`data/pop-songs.parquet`](data/pop-songs.parquet) | 1992-03-21 | 2026-08-08 | 71,800 | 1006.3 KB | `1a8af188ac7211da83d40e0679c242561a1776fb95299f497d5b0d19e27c7d23` |
 | Hot R&B/Hip-Hop Songs | [`data/r-b-hip-hop-songs.parquet`](data/r-b-hip-hop-songs.parquet) | 1958-10-25 | 2026-08-08 | 254,125 | 3.5 MB | `0a74de9c836ae2ab06b786e5ae77f056a9e9b0731f8e69caca818a10cb87cc15` |
 | Hot Rock & Alternative Songs | [`data/rock-songs.parquet`](data/rock-songs.parquet) | 2009-07-18 | 2026-08-08 | 44,550 | 667.0 KB | `e8e08b46e740cfcf7c9464b041625d6149e54a31c12de15f3070d8981809eb83` |
-<!-- CHART-INVENTORY:END -->
