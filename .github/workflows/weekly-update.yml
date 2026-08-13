@@ -25,8 +25,11 @@ jobs:
             --delay 0.5 \
             --export-parquet data
 
+      - name: Regenerate README chart inventory table
+        run: uv run generate_readme_table.py
+
       - name: Commit updated parquet files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: weekly chart data update"
-          file_pattern: "data/*.parquet"
+          file_pattern: "data/*.parquet README.md"
